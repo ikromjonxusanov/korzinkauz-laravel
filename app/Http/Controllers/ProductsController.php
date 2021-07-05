@@ -6,10 +6,13 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Rules\CategoryId;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ProductsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -17,13 +20,11 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        if (Auth::check()) {
-            $products = Product::orderByDesc('id')->paginate(25);
-            $categorys = Category::all();
-            return view('products.index', ["products"=>$products, "categorys"=>$categorys]);
-        } else {
-            return redirect(route('home'));
-        }
+        $products = Product::orderByDesc('id')->paginate(25);
+        $categorys = Category::all();
+        return view('products.index', ["products"=>$products, "categorys"=>$categorys,
+]);
+
     }
 
     /**

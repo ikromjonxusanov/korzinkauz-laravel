@@ -42,6 +42,9 @@
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-right bg-danger" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item text-danger" href="{{ route('profile.index') }}">
+                            Profile
+                        </a>
                         <a class="dropdown-item text-danger" href="{{ route('logout') }}"
                            onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

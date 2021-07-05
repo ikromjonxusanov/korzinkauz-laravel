@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Rules\PhoneValidator;
 use App\Rules\RoleId;
 use Illuminate\Http\Request;
-
+use \Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
     /**
@@ -15,10 +16,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $user = Auth::user();
 
-        return view('users.index',compact('users'));
-//            ->with('i', (request()->input('page', 1) - 1) * 5);
+        return view('profile.index',['user'=>$user]);
     }
 
     /**
@@ -28,7 +28,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        return redirect()->route('profile.index');
+
+        return view('profile.create');
     }
 
     /**
@@ -39,6 +41,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        return redirect()->route('profile.index');
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -59,7 +63,7 @@ class UserController extends Controller
 
         User::create($input);
 
-        return redirect()->route('products.index')
+        return redirect()->route('profile.index')
             ->with('success','Product created successfully.');
     }
 
@@ -68,9 +72,11 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show($id)
     {
-        return view('users.show',compact('user'));
+        $user = User::findOrFail($id);
+        $authUser = Auth::user();
+        return view('profile.show',compact('user', 'authUser'));
     }
 
     /**
@@ -79,7 +85,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('users.edit',compact('user'));
+        return view('profile.edit');
     }
 
     /**
@@ -90,14 +96,21 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'phone' => 'required|numbric|max:13',
-            'role_id'=>['required', 'integer', new RoleId]
+        $user = Auth::user();
+        if (Auth::user()->email === $request->all()['email']) {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'phone' => ['required', new PhoneValidator],
+            ]);
+        }
+        else {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'phone' => ['required',  new PhoneValidator],
+            ]);
+        }
 
-        ]);
 
         $input = $request->all();
 
@@ -111,9 +124,8 @@ class UserController extends Controller
         }
 
         $user->update($input);
-
-        return redirect()->route('users.index')
-            ->with('success','User profile updated successfully');
+        return redirect()->route('profile.index')
+            ->with('success','Profile updated successfully');
     }
 
     /**
@@ -122,9 +134,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->delete();
 
-        return redirect()->route('users.index')
-            ->with('success','User deleted successfully');
+        return redirect()->route('profile.index');
     }
 }

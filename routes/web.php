@@ -19,7 +19,7 @@ use App\Http\Controllers\UserController;
 Route::resource('/product', ProductsController::class);
 Route::resource('/category', CategorysController::class);
 Route::get('/category/{id}/products', [CategorysController::class, 'relevant_data']);
-Route::resource('/users', UserController::class);
+Route::resource('/profile', UserController::class);
 
 Auth::routes();
 
